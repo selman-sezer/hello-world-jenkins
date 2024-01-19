@@ -63,7 +63,7 @@ Next, we process the similarity DataFrame (similarity_df) obtained from the prev
 ------------
 ------------
 
-Feature Engineering 
+## Feature Engineering 
 1) We initialize a list of keywords (keywords2search)
 
 2) Then, next code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
@@ -117,7 +117,7 @@ question_mapping_scores) is a dataframe that provides a mapping between codes an
 ------------
 ------------
 ------------
-	Apply feature subset selection algorithm
+## Apply feature subset selection algorithm
 For this, releif algorithm is chosen as the feature subset selection.	
 
 1) https://colab.research.google.com/drive/1w_w7Bl4gb_oR7SviF-J3WTj5o8Se5pcA?authuser=1#scrollTo=Ba84Ao7djLk6&line=4&uniqifier=1
