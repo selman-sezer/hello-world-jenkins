@@ -1,5 +1,6 @@
-## Prompt matching with questions
+## 1 - Prompt matching with questions
 Instead of term frequency–inverse document frequency (tf-idf) we use word2vec for feature extraction. 
+#### 1.1
 ```
 def preprocess_text(text):
     # Convert text to lowercase and split it into words
@@ -12,23 +13,22 @@ prompts = []
 ...
 ```
 Breakdown of this code cell:
-#### 1) Data Preprocessing:
+###### 1.1.1. Data Preprocessing:
 The preprocess_text function is defined to convert text to lowercase, split it into words, and remove stop words.
 
-#### 2) Data Preparation:
+###### 1.1.2. Data Preparation:
 User prompts are extracted from a dataset (code2convos). It only extracts the prompts from the "user" role.
 
-#### 3) Word2Vec Training:
+###### 1.1.3. Word2Vec Training:
 Sentences (comprising both user prompts and questions) are preprocessed, and a Word2Vec model is trained using the Word2Vec class from the Gensim library. The model is configured with a vector size of 100, a window size of 5, and a minimum word count of 1.
 
-
-#### 4) Feature Extraction for Questions:
+###### 1.1.4. Feature Extraction for Questions:
 For each question, the code obtains its Word2Vec vector by averaging the vectors of its preprocessed words. The resulting vectors are used to create a DataFrame (questions_word2vec).
 
-#### 5) Feature Extraction for User Prompts:
+###### 1.1.5. Feature Extraction for User Prompts:
 For each code, the user prompts associated with that code are processed similarly to questions. Word2Vec vectors are obtained for each prompt, and DataFrames are created for each code (code2prompts_word2vec). Empty DataFrames are printed if there are no valid prompts for a code.
 
-#### 6) Handling NaN Values:
+###### 1.1.6. Handling NaN Values:
 NaN values in the DataFrames are replaced with zeros.
 
 
