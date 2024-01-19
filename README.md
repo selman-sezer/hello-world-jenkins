@@ -32,17 +32,33 @@ For each code, the user prompts associated with that code are processed similarl
 NaN values in the DataFrames are replaced with zeros.
 
 
-------------
-------------
-------------
+#### 1.2
 
 Then, we calculate the cosine similarity between the Word2Vec representations of questions (questions_word2vec) and the average representations of user prompts associated with different codes (code2prompts_word2vec). The resulting similarity scores are then organized into a DataFrame (similarity_df) for further analysis.
-Here is the workflow of this part:
 
-1) Cosine Similarity Calculation:
+```
+from sklearn.metrics.pairwise import cosine_similarity
+
+# Calculate cosine similarity between questions_word2vec and each code's prompts_word2vec
+code2similarity = {}
+
+for code, prompts_df in code2prompts_word2vec.items():
+    similarity_scores = cosine_similarity(prompts_df, questions_word2vec)
+    # Average similarity scores across prompts for each code
+    avg_similarity_score = similarity_scores.mean(axis=0)
+    code2similarity[code] = avg_similarity_score
+
+# Create a DataFrame to store the similarity scores
+similarity_df = pd.DataFrame(code2similarity, index=questions)
+
+# Display the resulting DataFrame
+print(similarity_df)
+```
+Here is the workflow of this part:
+###### 1.2.1. Cosine Similarity Calculation:
 The cosine_similarity function from scikit-learn is used to compute the cosine similarity between each code's prompts and all questions. This results in a matrix of similarity scores, where each row corresponds to a prompt for a specific code, and each column corresponds to a question.
 
-2) Averaging Similarity Scores:
+###### 1.2.2. Averaging Similarity Scores:
 For each code (user code), we calculate the average similarity score across all prompts associated with that code. This is done by taking the mean along the rows of the similarity matrix.
 
 3) Storing Results:
