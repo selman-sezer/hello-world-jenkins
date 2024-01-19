@@ -231,5 +231,154 @@ print("Shape of y_test:", y_test.shape)
 ```
 Here we use scikit-learn's train_test_split function to split the dataset into training and testing sets.
 
+#### 3.2.
+Here out code sets up and runs a genetic algorithm to find an optimal subset of features for a machine learning model
+```
+import numpy as np
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
+from deap import base, creator, tools, algorithms
+import random
+
+# Assuming df is your DataFrame and the last column is the target variable
+# Replace it with the actual target variable column name
+target_column = 'grades'
+X = X_train
+y = y_train
+
+# Create a fitness function
+def evaluate(individual, X, y, clf):
+    selected_features = [i for i, val in enumerate(individual) if val == 1]
+    if not selected_features:
+        return 0.0,  # Return a tuple
+    X_subset = X.iloc[:, selected_features]
+    scores = cross_val_score(clf, X_subset, y, cv=5, scoring='accuracy')
+    return np.mean(scores),  # Return a tuple
+
+# Set up the genetic algorithm
+creator.create("FitnessMax", base.Fitness, weights=(1.0,))
+creator.create("Individual", list, fitness=creator.FitnessMax)
+
+toolbox = base.Toolbox()
+toolbox.register("attr_bool", random.randint, 0, 1)
+toolbox.register("individual", tools.initRepeat, creator.Individual, toolbox.attr_bool, n=len(X.columns))
+toolbox.register("population", tools.initRepeat, list, toolbox.individual)
+...
+```
+#### 3.2.
+Then, we use the Information Gain filter method to select the top 10 features from the training set (X_train). The selected features are then printed to provide insights into which features are considered most informative for the classification task.
+```
+# Information Gain filter
+info_gain_selector = SelectKBest(score_func=mutual_info_classif, k=10)
+X_info_gain = info_gain_selector.fit_transform(X_train, y_train)
+
+print("\nInformation Gain Selected Features:")
+print(X.columns[info_gain_selector.get_support()])
+```
+#### 3.3.
+Next, we combine the features selected through the genetic algorithm (selected_from_genetic) and the features selected using the Information Gain filter method (selected_from_infogain). 
+```
+selected_from_genetic = ['#hyperparameter', '#correlation', '#adelie', '#variable', '#dataset', '#choose', '#chinstrap', '#import', 'Q_0', 'Q_4']
+selected_from_infogain = ['#hyperparameter', '#adelie', '#variable', '#choose', 'Q_1', 'Q_2', 'Q_5', 'Q_8']
+selected = (set(selected_from_genetic) | set(selected_from_infogain))
+```
+
+#### 3.4. 
+Then, we select a subset of features from the training and testing sets based on the combined set of selected features obtained from both the genetic algorithm and the Information Gain filter.
+```
+#select best subsets according to selection
+X_train_selected = X_train[selected]
+X_test_selected = X_test[selected]
+
+# Print the shapes of the resulting sets
+print("Shape of X_train:", X_train_selected.shape)
+print("Shape of X_test:", X_test_selected.shape)
+```
+
+
+## 4 - Model Building
+We use linear regression with Lasso regression (skip feature subset selection in this case). Lasso regressison will provide another level of feature selection.
+
+#### 4.1.
+```
+# Standardize features (important for Lasso regression)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# Define a range of alpha values
+alphas = np.arange(0.1, 3.1, 0.1)
+
+# Lists to store results
+mse_values = []
+adjusted_r2_values = []
+
+# Iterate over alpha values
+for alpha in alphas:
+    # Create and train Lasso regression model
+    lasso_model = Lasso(alpha=alpha)
+    lasso_model.fit(X_train_scaled, y_train)
+
+    # Make predictions on the test set
+    y_pred_lasso = lasso_model.predict(X_test_scaled)
+
+    # Evaluate the model
+    mse = mean_squared_error(y_test, y_pred_lasso)
+    r2 = r2_score(y_test, y_pred_lasso)
+
+    # Calculate adjusted R-squared
+    n = X_test_scaled.shape[0]
+    k = X_test_scaled.shape[1]
+    adjusted_r2 = 1 - (1 - r2) * ((n - 1) / (n - k - 1))
+
+    # Append results to lists
+    mse_values.append(mse)
+    adjusted_r2_values.append(adjusted_r2)
+```
+
+We try to do model building using Lasso regression with different values of the regularization parameter (alpha). We create 'alphas', an array of alpha values ranging from 0.1 to 3.0 with a step of 0.1. The code iterates over each alpha value in the alphas array.
+In summary, this code performs Lasso regression with different regularization parameter values. It standardizes the features, iterates over a range of alpha values, builds a Lasso model for each alpha, evaluates the model on the testing set, and stores the MSE and adjusted R-squared values for each alpha in separate lists. These lists can be used to analyze the performance of the Lasso models with different levels of regularization.
+
+#### 4.2. 
+```
+# Print alpha values along with their corresponding adjusted R2 and RMSE
+print("Alpha\tAdjusted R2\tRMSE")
+print("----------------------------------")
+
+for i, alpha in enumerate(alphas):
+    # Create and train Lasso regression model
+    lasso_model = Lasso(alpha=alpha)
+    lasso_model.fit(X_train_scaled, y_train)
+
+    # Make predictions on the test set
+    y_pred_lasso = lasso_model.predict(X_test_scaled)
+
+    # Evaluate the model
+    mse = mean_squared_error(y_test, y_pred_lasso)
+    r2 = r2_score(y_test, y_pred_lasso)
+
+    # Calculate adjusted R-squared
+    n = X_test_scaled.shape[0]
+    k = X_test_scaled.shape[1]
+    adjusted_r2 = 1 - (1 - r2) * ((n - 1) / (n - k - 1))
+
+    # Print alpha, adjusted R2, and RMSE
+    print(f"{alpha:.2f}\t{adjusted_r2:.4f}\t\t{mse:.4f}")
+```
+Then we  print a table of alpha values along with their corresponding adjusted R-squared (adjusted R2) and Root Mean Squared Error (RMSE) values for Lasso regression. This code provides a clear output of the performance metrics (adjusted R2 and RMSE) for different alpha values in Lasso regression. This information is useful for selecting an appropriate alpha value that balances model complexity and performance on the testing set.
+Finally, we plot the results.
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
