@@ -100,7 +100,7 @@ We initialize a list of keywords (keywords2search)
 Then, this code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
 
 ```
-Using pattern based approach in the structure of the sentences to tell if it is an error or not
+# Using pattern based approach in the structure of the sentences to tell if it is an error or not
 
 code2features = defaultdict(lambda : defaultdict(int))
 for code, convs in code2convos.items():
@@ -110,14 +110,14 @@ for code, convs in code2convos.items():
     for c in convs:
         text = c["text"].lower()
         if c["role"] == "user":
-             User Prompts
-             count the user prompts
+            # User Prompts
+            # count the user prompts
             code2features[code]["#user_prompts"] += 1
             for kw in keywords2search:
                 code2features[code][f"#{kw}"] +=  len(re.findall(rf"\b{kw}\b", text))
             code2features[code]["prompt_avg_chars"] += len(text)
         else:
-             ChatGPT Responses
+            # ChatGPT Responses
             code2features[code]["response_avg_chars"] += len(text)
 
         code2features[code]["prompt_avg_chars"] /= code2features[code]["#user_prompts"]
@@ -130,52 +130,94 @@ for code, convs in code2convos.items():
 ######	2.2.2. Iterating Through Codes and Conversations:
 	Then it iterates through each code and its corresponding conversations (convs) in the 		code2convos dictionary.
 
-	2.3) Counting User Prompts:
+######	2.2.3. Counting User Prompts:
 	For each user prompt in the conversations, it increments the count of user prompts 		(#user_prompts) for the respective code.
 
 
-	2.4) Counting Keyword Occurrences:
+######	2.2.4. Counting Keyword Occurrences:
 	For each user prompt, we count the occurrences of keywords from the 				keywords2search list using regular expressions.
 
-	2.5) Calculating Average Characters:
+######	2.2.5. Calculating Average Characters:
 	Keep track of the total number of characters in both user prompts 				(prompt_avg_chars) and ChatGPT responses (response_avg_chars). It later calculates the 		average characters for both.
 
-	2.6) Printing Codes with No Conversations:
+######	2.2.6. Printing Codes with No Conversations:
 	If there are no conversations (convs) for a particular code, it prints the code to 		the console.
 
-	2.7) Normalization of Average Characters:
+######	2.2.7. Normalization of Average Characters:
 	Finally we normalize the average characters for user prompts and ChatGPT responses by 		dividing the total characters by the number of user prompts.
 
 
 
-3) Then we create a Pandas DataFrame (df) from the feature information stored in the code2features dictionary. 
+#### 2.3.
+Then we create a Pandas DataFrame (df) from the feature information stored in the code2features dictionary. 
+```
+df = pd.DataFrame(code2features).T
+df.head(5)
+```
 
-4) Next, we read a CSV file named "scores.csv" and store the resulting DataFrame in the variable named scores. Then some information about scores is displayed. 
+#### 2.4. 
+Next, we read a CSV file named "scores.csv" and store the resulting DataFrame in the variable named scores. Then some information about scores is displayed. 
+```
+scores = pd.read_csv("/content/scores.csv", sep=",")
+scores["code"] = scores["code"].apply(lambda x: x.strip())
 
-5)  After that, we modify the structure of the Pandas DataFrame df that was created in a previous section. Reset_index method is used to reset the index of the DataFrame df. The  rename method is used to rename the column with the label "index" to "code". 
+# selecting the columns we need and we care
+scores = scores[["code", "grade"]]
 
-6)Then, we perform a left merge between two Pandas DataFrames (df and question_mapping_scores)
+# show some examples
+scores.head()
+```
+
+#### 2.5. 
+After that, we modify the structure of the Pandas DataFrame df that was created in a previous section. Reset_index method is used to reset the index of the DataFrame df. The  rename method is used to rename the column with the label "index" to "code". 
+```
+df.reset_index(inplace=True, drop=False)
+df.rename(columns={"index": "code"}, inplace=True)
+df.head()
+```
+
+#### 2.6. 
+Then, we perform a left merge between two Pandas DataFrames (df and question_mapping_scores)
 question_mapping_scores) is a dataframe that provides a mapping between codes and their respective similarity scores for each question, it's created earlier.
+```
+df = pd.merge(df, question_mapping_scores, on="code", how="left")
+```
 
-7)Next, we extend the feature merging process by incorporating information from another DataFrame named scores. The result of the merge and data cleaning operations is stored back in the temp_df. 
+#### 2.7. 
+Next, we extend the feature merging process by incorporating information from another DataFrame named scores. The result of the merge and data cleaning operations is stored back in the temp_df. 
+```
+# Merge the Features
+temp_df = pd.merge(df, scores, on='code', how="left")
+temp_df.dropna(inplace=True)
+temp_df.drop_duplicates("code",inplace=True, keep="first")
+temp_df.head()
+```
 
-8)Then we set up the features (X) and the target variable (y) for a machine learning model.
-	8.1) Feature Selection
-		temp_df.columns[1:-1] selects all columns from the second column to the second-			to-last column of the DataFrame (temp_df). These columns are considered as 			features for the machine learning model.
-	8.2) Target Variable Selection
-		temp_df["grade"] selects the "grade" column from the DataFrame (temp_df). This 			column is considered as the target variable for the machine learning model.
-	8.3) Setting Up Features and Target Variable
-		X is assigned the selected features.
-		y is assigned the selected target variable.
+#### 2.8. 
+Then we set up the features (X) and the target variable (y) for a machine learning model.
+```
+# Set the features and target variables
+X = temp_df[temp_df.columns[1:-1]]
+y = temp_df["grade"]
+print(X.shape, y.shape)
+```
+###### 2.8.1. Feature Selection
+temp_df.columns[1:-1] selects all columns from the second column to the second-to-last column of the DataFrame (temp_df). These columns are considered as 			features for the machine learning model.
+###### 2.8.2. Target Variable Selection
+temp_df["grade"] selects the "grade" column from the DataFrame (temp_df). This column is considered as the target variable for the machine learning model.
+###### 2.8.3. Setting Up Features and Target Variable
+X is assigned the selected features.
+y is assigned the selected target variable.
 
 
 ------------
 ------------
 ------------
-## Apply feature subset selection algorithm
+## 3 - Apply feature subset selection algorithm
 For this, releif algorithm is chosen as the feature subset selection.	
 
-1) https://colab.research.google.com/drive/1w_w7Bl4gb_oR7SviF-J3WTj5o8Se5pcA?authuser=1#scrollTo=Ba84Ao7djLk6&line=4&uniqifier=1
+#### 3.1.
+
 Here we use scikit-learn's train_test_split function to split the dataset into training and testing sets.
 
 
