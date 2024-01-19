@@ -123,7 +123,7 @@ for code, convs in code2convos.items():
         code2features[code]["prompt_avg_chars"] /= code2features[code]["#user_prompts"]
         code2features[code]["response_avg_chars"] /= code2features[code]["#user_prompts"]
 ```
-
+aaaaaaa 
 ######	2.2.1. Initialization
 	We initialize a defaultdict of defaultdict named code2features to store 			features for each code. This data structure is used to store counts related to user 		prompts and ChatGPT responses.
 
