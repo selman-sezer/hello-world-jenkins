@@ -99,28 +99,53 @@ We initialize a list of keywords (keywords2search)
 #### 2.2. 
 Then, this code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
 
+```
+### Using pattern based approach in the structure of the sentences to tell if it is an error or not
 
+code2features = defaultdict(lambda : defaultdict(int))
 
-######	2.2.1. Initialization
+for code, convs in code2convos.items():
+    if len(convs) == 0:
+        print(code)
+        continue
+    for c in convs:
+        text = c["text"].lower()
+        if c["role"] == "user":
+            # User Prompts
+            # count the user prompts
+            code2features[code]["#user_prompts"] += 1
+            for kw in keywords2search:
+                code2features[code][f"#{kw}"] +=  len(re.findall(rf"\b{kw}\b", text))
+
+            code2features[code]["prompt_avg_chars"] += len(text)
+        else:
+            # ChatGPT Responses
+            code2features[code]["response_avg_chars"] += len(text)
+
+        code2features[code]["prompt_avg_chars"] /= code2features[code]["#user_prompts"]
+        code2features[code]["response_avg_chars"] /= code2features[code]["#user_prompts"]
+```
+
+###### 2.2.1. Initialization
 	We initialize a defaultdict of defaultdict named code2features to store 			features for each code. This data structure is used to store counts related to user 		prompts and ChatGPT responses.
 
-######	2.2.2. Iterating Through Codes and Conversations:
+###### 2.2.2. Iterating Through Codes and Conversations:
 	Then it iterates through each code and its corresponding conversations (convs) in the 		code2convos dictionary.
 
-######	2.2.3. Counting User Prompts:
+###### 2.2.3. Counting User Prompts:
 	For each user prompt in the conversations, it increments the count of user prompts 		(#user_prompts) for the respective code.
 
 
-######	2.2.4. Counting Keyword Occurrences:
+###### 2.2.4. Counting Keyword Occurrences:
 	For each user prompt, we count the occurrences of keywords from the 				keywords2search list using regular expressions.
 
-######	2.2.5. Calculating Average Characters:
+###### 2.2.5. Calculating Average Characters:
 	Keep track of the total number of characters in both user prompts 				(prompt_avg_chars) and ChatGPT responses (response_avg_chars). It later calculates the 		average characters for both.
 
-######	2.2.6. Printing Codes with No Conversations:
+###### 2.2.6. Printing Codes with No Conversations:
 	If there are no conversations (convs) for a particular code, it prints the code to 		the console.
 
-######	2.2.7. Normalization of Average Characters:
+###### 2.2.7. Normalization of Average Characters:
 	Finally we normalize the average characters for user prompts and ChatGPT responses by 		dividing the total characters by the number of user prompts.
 
 
@@ -194,7 +219,16 @@ y is assigned the selected target variable.
 For this, releif algorithm is chosen as the feature subset selection.	
 
 #### 3.1.
-
+```
+from sklearn.model_selection import train_test_split
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+# Print the shapes of the resulting sets
+print("Shape of X_train:", X_train.shape)
+print("Shape of X_test:", X_test.shape)
+print("Shape of y_train:", y_train.shape)
+print("Shape of y_test:", y_test.shape)
+```
 Here we use scikit-learn's train_test_split function to split the dataset into training and testing sets.
 
 
