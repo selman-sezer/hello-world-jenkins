@@ -1,6 +1,6 @@
 ## 1 - Prompt matching with questions
 Instead of term frequency–inverse document frequency (tf-idf) we use word2vec for feature extraction. 
-#### 1.1
+#### 1.1.
 ```
 def preprocess_text(text):
     # Convert text to lowercase and split it into words
@@ -32,7 +32,7 @@ For each code, the user prompts associated with that code are processed similarl
 NaN values in the DataFrames are replaced with zeros.
 
 
-#### 1.2
+#### 1.2.
 
 Then, we calculate the cosine similarity between the Word2Vec representations of questions (questions_word2vec) and the average representations of user prompts associated with different codes (code2prompts_word2vec). The resulting similarity scores are then organized into a DataFrame (similarity_df) for further analysis.
 
@@ -71,7 +71,7 @@ The similarity scores are organized into a DataFrame (similarity_df). Each row o
 The resulting DataFrame is printed, showing the average similarity scores between questions and prompts for each code
 
 
-#### 1.2
+#### 1.3.
 
 Next, we process the similarity DataFrame (similarity_df) obtained from the previous code section. It organizes and structures the similarity scores to create a new DataFrame (question_mapping_scores) that provides a mapping between codes and their respective similarity scores for each question. 
 
