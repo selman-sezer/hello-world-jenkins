@@ -91,15 +91,43 @@ question_mapping_scores
 ------------
 
 ## 2 - Feature Engineering 
-1) We initialize a list of keywords (keywords2search)
+To improve, we add following parts.
 
-2) Then, next code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
+#### 2.1. 
+We initialize a list of keywords (keywords2search)
 
+#### 2.2. 
+Then, this code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
 
-	2.1) Initialization
+```
+# Using pattern based approach in the structure of the sentences to tell if it is an error or not
+
+code2features = defaultdict(lambda : defaultdict(int))
+for code, convs in code2convos.items():
+    if len(convs) == 0:
+        print(code)
+        continue
+    for c in convs:
+        text = c["text"].lower()
+        if c["role"] == "user":
+            # User Prompts
+            # count the user prompts
+            code2features[code]["#user_prompts"] += 1
+            for kw in keywords2search:
+                code2features[code][f"#{kw}"] +=  len(re.findall(rf"\b{kw}\b", text))
+            code2features[code]["prompt_avg_chars"] += len(text)
+        else:
+            # ChatGPT Responses
+            code2features[code]["response_avg_chars"] += len(text)
+
+        code2features[code]["prompt_avg_chars"] /= code2features[code]["#user_prompts"]
+        code2features[code]["response_avg_chars"] /= code2features[code]["#user_prompts"]
+```
+
+######	2.2.1. Initialization
 	We initialize a defaultdict of defaultdict named code2features to store 			features for each code. This data structure is used to store counts related to user 		prompts and ChatGPT responses.
 
-	2.2) Iterating Through Codes and Conversations:
+######	2.2.2. Iterating Through Codes and Conversations:
 	Then it iterates through each code and its corresponding conversations (convs) in the 		code2convos dictionary.
 
 	2.3) Counting User Prompts:
