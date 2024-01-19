@@ -61,25 +61,36 @@ The cosine_similarity function from scikit-learn is used to compute the cosine s
 ###### 1.2.2. Averaging Similarity Scores:
 For each code (user code), we calculate the average similarity score across all prompts associated with that code. This is done by taking the mean along the rows of the similarity matrix.
 
-3) Storing Results:
+###### 1.2.3. Storing Results:
 The average similarity scores for each code are stored in the code2similarity dictionary, where the code serves as the key.
 
-4) Creating a DataFrame:
+###### 1.2.4. Creating a DataFrame:
 The similarity scores are organized into a DataFrame (similarity_df). Each row of the DataFrame corresponds to a question, and each column corresponds to a code. The values in the DataFrame represent the average cosine similarity score between the questions and the prompts for each code.
 
-5) Displaying Results:
+###### 1.2.5. Displaying Results:
 The resulting DataFrame is printed, showing the average similarity scores between questions and prompts for each code
 
 
-------------
+#### 1.2
 
 Next, we process the similarity DataFrame (similarity_df) obtained from the previous code section. It organizes and structures the similarity scores to create a new DataFrame (question_mapping_scores) that provides a mapping between codes and their respective similarity scores for each question. 
 
+```
+code2questionmapping = dict()
+for code, cosine_scores in similarity_df.items():
+    code2questionmapping[code] = similarity_df[code].tolist()
+
+question_mapping_scores = pd.DataFrame(code2questionmapping).T
+question_mapping_scores.reset_index(inplace=True)
+question_mapping_scores.rename(columns={i: f"Q_{i}" for i in range(len(questions))}, inplace=True)
+question_mapping_scores.rename(columns={"index" : "code"}, inplace=True)
+question_mapping_scores
+```
 ------------
 ------------
 ------------
 
-## Feature Engineering 
+## 2 - Feature Engineering 
 1) We initialize a list of keywords (keywords2search)
 
 2) Then, next code cell processes conversations stored in code2convos and extracts various features related to user prompts and ChatGPT responses for each code. Additionally, it incorporates a pattern-based approach to identify if a user prompt contains specific error-related terms.
