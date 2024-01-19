@@ -1,6 +1,6 @@
 ## Prompt matching with questions
 Instead of term frequency–inverse document frequency (tf-idf) we use word2vec for feature extraction. 
-
+```
 def preprocess_text(text):
     # Convert text to lowercase and split it into words
     words = text.lower().split()
@@ -10,6 +10,7 @@ def preprocess_text(text):
 keywords = []
 prompts = []
 ...
+```
 Breakdown of this code cell:
 #### 1) Data Preprocessing:
 The preprocess_text function is defined to convert text to lowercase, split it into words, and remove stop words.
