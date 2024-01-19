@@ -127,10 +127,10 @@ for code, convs in code2convos.items():
 ```
 
 ###### 2.2.1. Initialization
-	We initialize a defaultdict of defaultdict named code2features to store 			features for each code. This data structure is used to store counts related to user 		prompts and ChatGPT responses.
+We initialize a defaultdict of defaultdict named code2features to store 			features for each code. This data structure is used to store counts related to user 		prompts and ChatGPT responses.
 
 ###### 2.2.2. Iterating Through Codes and Conversations:
-	Then it iterates through each code and its corresponding conversations (convs) in the 		code2convos dictionary.
+Then it iterates through each code and its corresponding conversations (convs) in the 		code2convos dictionary.
 
 ###### 2.2.3. Counting User Prompts:
 	For each user prompt in the conversations, it increments the count of user prompts 		(#user_prompts) for the respective code.
